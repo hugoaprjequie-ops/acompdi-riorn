@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 
-st.set_page_config(page_title="SUPERMATINAL", layout="wide")
+st.set_page_config(page_title="VESPERTINA", layout="wide")
 
 # ==========================================
 # DADOS DE HIERARQUIA E ACESSO
