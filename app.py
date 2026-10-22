@@ -17,7 +17,7 @@ GVS_CONFIG = {
 # INICIALIZAÇÃO DO BANCO DE DADOS TEMPORÁRIO
 # ==========================================
 if 'focos_diarios' not in st.session_state:
-    st.session_state.focos_diarios = {} # Ex: {'GP7 JEQUIÉ_GV 1': ['LITRINHO', 'NAB']}
+    st.session_state.focos_diarios = {} 
 if 'metas_rns' not in st.session_state:
     st.session_state.metas_rns = pd.DataFrame()
 if 'execucoes' not in st.session_state:
@@ -58,19 +58,25 @@ if aba_selecionada == "Aba GV (Gestão)":
             if st.button("Definir Focos e Abrir Desdobramento"):
                 st.session_state.focos_diarios[chave_gv] = focos_preenchidos
                 
-                # Prepara a tabela de metas para os RNs desta equipe
+                # Prepara a tabela inicial de metas com os RNs da equipe e valores zerados
                 df_metas = pd.DataFrame({"RN": rns_gv})
                 for foco in focos_preenchidos:
                     df_metas[f"Meta: {foco}"] = 0
                 st.session_state.metas_rns = df_metas
                 st.rerun()
 
-            # Exibe a tabela para desdobrar metas se os focos já estiverem salvos
+            # Exibe a tabela para desdobrar metas agrupada no st.form para evitar o lag
             if chave_gv in st.session_state.focos_diarios and not st.session_state.metas_rns.empty:
                 st.subheader("2. Desdobrar Metas por RN")
                 st.caption("Altere os valores na tabela abaixo para definir a meta de cada RN.")
-                st.session_state.metas_rns = st.data_editor(st.session_state.metas_rns, hide_index=True)
-                st.success("Metas prontas para acompanhamento!")
+                
+                with st.form("form_metas"):
+                    tabela_editada = st.data_editor(st.session_state.metas_rns, hide_index=True, use_container_width=True)
+                    salvar_metas = st.form_submit_button("Enviar Metas 🎯")
+                    
+                    if salvar_metas:
+                        st.session_state.metas_rns = tabela_editada
+                        st.success("Metas salvas e prontas para acompanhamento!")
         
         with col2:
             st.subheader("📊 Entregas da sua Equipe (Tempo Real)")
@@ -86,7 +92,7 @@ if aba_selecionada == "Aba GV (Gestão)":
                     st.markdown(f"**RN {row['RN']}:** {row['Qtd Realizada']} {row['Desafio']} | **PDVS:** {', '.join(row['PDV'])}")
                 
                 st.write("Histórico Completo:")
-                st.dataframe(df_minha_equipe, hide_index=True)
+                st.dataframe(df_minha_equipe, hide_index=True, use_container_width=True)
             else:
                 st.info("Nenhuma baixa realizada pela sua equipe hoje ainda.")
                 
